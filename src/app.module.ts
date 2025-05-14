@@ -6,14 +6,18 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-    imports: [ConfigModule.forRoot({
+    imports: [
+        ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: [`.env`],
             validationSchema: Joi.object({
                 API_DOCS_ENABLED: Joi.string().optional(),
                 PORT: Joi.number().required(),
             }),
-        }),WeatherModule, SubscriptionModule],
+        }),
+        WeatherModule,
+        SubscriptionModule,
+    ],
     controllers: [],
     providers: [AppService],
 })
