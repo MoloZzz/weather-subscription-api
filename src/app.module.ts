@@ -7,6 +7,8 @@ import { OpenWeatherModule } from './integrations/open-weather/open-weather.modu
 import { entities } from './common/entities';
 import { migrations } from './common/migrations';
 import { PostgresqlModule } from './libs/postgresql/postgresql.module';
+import { CityModule } from './city/city.module';
+import { UserModule } from './user/user.module';
 
 @Module({
     imports: [
@@ -30,6 +32,8 @@ import { PostgresqlModule } from './libs/postgresql/postgresql.module';
         SubscriptionModule,
         OpenWeatherModule,
         PostgresqlModule.register(entities, migrations, []),
+        CityModule,
+        UserModule,
     ],
     controllers: [],
     providers: [],

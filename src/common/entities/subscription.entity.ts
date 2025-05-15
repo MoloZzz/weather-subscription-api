@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn, UpdateDateColumn, Unique } from 'typeorm';
 import { CityEntity } from './city.entity';
 import { UserEntity } from './user.entity';
 import { SubscribeFreq } from '../enums';
 
 @Entity('subscriptions')
+@Unique(['subscriber', 'city'])
 export class SubscriptionEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
