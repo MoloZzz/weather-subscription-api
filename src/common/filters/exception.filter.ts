@@ -22,7 +22,6 @@ export class ExceptionsFilter implements ExceptionFilter {
     let message = 'Internal server error';
     let errors: any[] = [];
 
-    // NestJS стандартні винятки
     if (exception instanceof BadRequestException) {
       status = 400;
       const responseData = exception.getResponse();
@@ -45,18 +44,15 @@ export class ExceptionsFilter implements ExceptionFilter {
       message = this.extractMessage(responseData, exception.message);
     }
 
-    // TypeORM: не знайдено ентіті
     else if (exception instanceof EntityNotFoundError) {
       status = 404;
       message = 'Entity not found';
     }
 
-    // TypeORM: помилки запиту (наприклад, порушення унікальності)
     else if (exception instanceof QueryFailedError) {
       const err = exception as any;
       const code = err.code;
 
-      // Приклад PostgreSQL
       if (code === '23505') {
         status = 409;
         message = 'Unique constraint violation';
@@ -73,7 +69,6 @@ export class ExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    // Усі інші
     else if (exception?.message) {
       message = exception.message;
     }
