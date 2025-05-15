@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CityService } from 'src/city/city.service';
 import { SubscribeDto, SubscriptionResponseDto } from 'src/common/dtos';
@@ -18,7 +18,6 @@ export class SubscriptionService {
     async subscribe(dto: SubscribeDto): Promise<SubscriptionResponseDto> {
         const city = await this.cityService.findOrCreateByName(dto.city);
         const subscriber = await this.userService.findOrCreate(dto.email);
-
         const subscription = await this.subscriptionRepository.save({
             city,
             frequency: dto.frequency,
@@ -35,18 +34,8 @@ export class SubscriptionService {
     }
 
     async confirm(token: string) {
-        const user = await this.userService.findByToken(token);
-        if (!user || !user.confirmationExpiresAt || user.confirmationExpiresAt < new Date()) {
-            throw new BadRequestException('Confirmation token is invalid or expired');
-        }
-
-        user.isConfirmed = true;
-        user.confirmationToken = null;
-        user.confirmationExpiresAt = null;
-        await this.userService.save(user);
-
+        const user = await this.userService.confirmEmail(token);
         await this.subscriptionRepository.update({ subscriber: { id: user.id } }, { isActive: true });
-
         return { message: 'Subscription confirmed successfully' };
     }
 
@@ -55,9 +44,8 @@ export class SubscriptionService {
         if (!user) {
             throw new NotFoundException('Invalid token');
         }
-
-        await this.subscriptionRepository.update({ subscriber: { id: user.id } }, { isActive: false });
-
+        await this.subscriptionRepository.delete({ subscriber: { id: user.id } });
+        await this.userService.deactivateToken(token);
         return { message: 'Unsubscribed successfully' };
     }
 }

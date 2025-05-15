@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from 'src/common/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -19,19 +19,26 @@ export class UserService {
     }
 
     async findOrCreate(email: string): Promise<UserEntity> {
-        const existing = await this.findByEmail(email);
-        if (existing) return existing;
+        let user = await this.findByEmail(email);
 
-        const user = this.userRepository.create({
-            email,
-            isConfirmed: false,
-            confirmationToken: uuidv4(),
-            confirmationExpiresAt: dayjs().add(15, 'minutes').toDate(), // 15 minutes confirmation time
-        });
+        const confirmationToken = uuidv4();
+        const confirmationExpiresAt = dayjs().add(15, 'minutes').toDate();
 
-        await this.emailService.sendConfirmationEmail(user.email, user.confirmationToken);
-
-        return this.userRepository.save(user);
+        if (user) {
+            user.confirmationToken = confirmationToken;
+            user.confirmationExpiresAt = confirmationExpiresAt;
+            await this.userRepository.save(user);
+        } else {
+            user = this.userRepository.create({
+                email,
+                isConfirmed: false,
+                confirmationToken,
+                confirmationExpiresAt,
+            });
+            await this.userRepository.save(user);
+        }
+        await this.emailService.sendConfirmationEmail(user.email, confirmationToken);
+        return user;
     }
 
     async findByToken(token: string): Promise<UserEntity | null> {
@@ -41,7 +48,25 @@ export class UserService {
         });
     }
 
+    async deactivateToken(token: string): Promise<void> {
+        await this.userRepository.update({ confirmationToken: token }, { confirmationToken: null, confirmationExpiresAt: null });
+    }
+
     async save(user: UserEntity): Promise<UserEntity> {
         return this.userRepository.save(user);
+    }
+
+    async confirmEmail(token: string): Promise<UserEntity> {
+        const user = await this.userRepository.findOne({
+            where: { confirmationToken: token },
+            relations: ['subscriptions'],
+        });
+
+        if (!user || !user.confirmationExpiresAt || user.confirmationExpiresAt < new Date()) {
+            throw new BadRequestException('Confirmation token is invalid or expired');
+        }
+
+        user.isConfirmed = true;
+        return await this.userRepository.save(user);
     }
 }
