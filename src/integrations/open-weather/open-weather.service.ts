@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import config from '../../../config';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
@@ -10,7 +10,6 @@ const openWeatherConfig = config().openApiIntegration;
 @Injectable()
 export class OpenWeatherService {
   private readonly indexURL: string;
-  private readonly headers: string;
   private readonly apiKey: string;
   private readonly lang: string;
 
@@ -44,7 +43,7 @@ export class OpenWeatherService {
         'Error OpenWeatherService.getWeatherDataByCoordinates:',
         error,
       );
-      throw new Error('Failed to fetch weather data');
+      throw new HttpException('Failed to fetch weather data', HttpStatus.BAD_GATEWAY);
     }
   }
 
@@ -65,7 +64,7 @@ export class OpenWeatherService {
       return res.data;
     } catch (error) {
       console.error('Error OpenWeatherService.getGeocodingDataByCity:', error);
-      throw new Error('Failed to fetch coordinates by city');
+      throw new HttpException('Failed to fetch coordinates by city', HttpStatus.BAD_GATEWAY);
     }
   } //TODO: test
 }
