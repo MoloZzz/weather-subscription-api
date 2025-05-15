@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsNotEmpty } from 'class-validator';
-import { SubscribeFreq } from '../enums/subscribe-freq.enum';
+import { SubscribeFreq } from '../enums';
 
 export class SubscribeDto {
     @ApiProperty({ description: 'Email address to subscribe' })

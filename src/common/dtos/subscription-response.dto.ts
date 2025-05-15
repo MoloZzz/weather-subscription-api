@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SubscribeFreq } from '../enums/subscribe-freq.enum';
+import { SubscribeFreq } from '../enums';
 
 export class SubscriptionResponseDto {
     @ApiProperty({ description: 'Email address' })
