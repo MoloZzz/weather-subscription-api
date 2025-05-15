@@ -1,4 +1,9 @@
 # An API service that allow you to subscribe to regular weather forecast updates in the selected city
+## Basic user logic
+User calls the [post] /api/subscription/subscribe request passing email, notification frequency and city.
+Receives a message with a token to the entered email.
+Confirms the action by passing this token with a request [get] api/subscription/confirm.
+Can stop receiving messages by passing the received token with a request to [get] api/subscription/unsubscribe
 
 ## Installation
 
