@@ -51,4 +51,27 @@ $ yarn run typeorm:migration:generate src/common/migrations/create-users
 $ yarn run typeorm:migration:create .src/common/migrations/{name}
 # for register
 $ yarn run typeorm:migration:register:create .src/common/migrations/{name}
+```
+## Env
+```
+PORT=4000
+API_DOCS_ENABLED=true
+
+OPEN_WEATHER_BASE_URL=https://api.openweathermap.org
+OPEN_WEATHER_API_KEY=
+OPEN_WEATHER_RESPONSE_LANGUAGE=ua
+
+POSTGRES_HOST=localhost
+POSTGRES_USER=postgres
+POSTGRES_PORT=5432
+POSTGRES_PASS=
+POSTGRES_DB_NAME=weather-subscription
+POSTGRES_IS_LOGGING_ENABLED=false
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=
+SMTP_PASS=
+```
 

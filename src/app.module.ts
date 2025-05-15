@@ -9,6 +9,7 @@ import { migrations } from './common/migrations';
 import { PostgresqlModule } from './libs/postgresql/postgresql.module';
 import { CityModule } from './city/city.module';
 import { UserModule } from './user/user.module';
+import { EmailModule } from './integrations/email/email.module';
 
 @Module({
     imports: [
@@ -26,6 +27,11 @@ import { UserModule } from './user/user.module';
                 POSTGRES_HOST: Joi.string().required(),
                 POSTGRES_PORT: Joi.string().required(),
                 POSTGRES_PASS: Joi.string().required(),
+                SMTP_HOST: Joi.string().required(),
+                SMTP_PORT: Joi.string().required(),
+                SMTP_USER: Joi.string().required(),
+                SMTP_PASS: Joi.string().required(),
+                SMTP_SECURE: Joi.boolean().required(),
             }),
         }),
         WeatherModule,
@@ -34,6 +40,7 @@ import { UserModule } from './user/user.module';
         PostgresqlModule.register(entities, migrations, []),
         CityModule,
         UserModule,
+        EmailModule,
     ],
     controllers: [],
     providers: [],

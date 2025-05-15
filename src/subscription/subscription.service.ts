@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CityService } from 'src/city/city.service';
 import { SubscribeDto, SubscriptionResponseDto } from 'src/common/dtos';
@@ -34,11 +34,30 @@ export class SubscriptionService {
         };
     }
 
-    async unsubscribe(token: string) {
-        return { message: `Unsubscribed successfully` };
+    async confirm(token: string) {
+        const user = await this.userService.findByToken(token);
+        if (!user || !user.confirmationExpiresAt || user.confirmationExpiresAt < new Date()) {
+            throw new BadRequestException('Confirmation token is invalid or expired');
+        }
+
+        user.isConfirmed = true;
+        user.confirmationToken = null;
+        user.confirmationExpiresAt = null;
+        await this.userService.save(user);
+
+        await this.subscriptionRepository.update({ subscriber: { id: user.id } }, { isActive: true });
+
+        return { message: 'Subscription confirmed successfully' };
     }
 
-    async confirm(token: string) {
-        return { message: `Subscription confirmed successfully` };
+    async unsubscribe(token: string) {
+        const user = await this.userService.findByToken(token);
+        if (!user) {
+            throw new NotFoundException('Invalid token');
+        }
+
+        await this.subscriptionRepository.update({ subscriber: { id: user.id } }, { isActive: false });
+
+        return { message: 'Unsubscribed successfully' };
     }
 }
