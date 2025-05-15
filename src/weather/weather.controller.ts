@@ -1,8 +1,7 @@
-import { Controller, Get, Param, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CityParamDto } from 'src/common/dtos/city-param.dto';
-import { WeatherResponseDto } from 'src/common/dtos/weather-response.dto';
 import { WeatherService } from './weather.service';
+import { WeatherResponseDto, CityParamDto } from 'src/common/dtos';
 
 @ApiTags('weather')
 @Controller('weather')

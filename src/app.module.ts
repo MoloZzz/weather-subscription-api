@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { WeatherModule } from './weather/weather.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { ConfigModule } from '@nestjs/config';
+import { OpenWeatherModule } from './integrations/open-weather/open-weather.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { ConfigModule } from '@nestjs/config';
         }),
         WeatherModule,
         SubscriptionModule,
+        OpenWeatherModule,
     ],
     controllers: [],
     providers: [AppService],
