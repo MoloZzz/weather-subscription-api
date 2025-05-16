@@ -11,6 +11,7 @@ import { CityModule } from './city/city.module';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './integrations/email/email.module';
 import { NotificationModule } from './notification/notification.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
     imports: [
@@ -34,6 +35,10 @@ import { NotificationModule } from './notification/notification.module';
                 SMTP_PASS: Joi.string().required(),
                 SMTP_SECURE: Joi.boolean().required(),
             }),
+        }),
+        CacheModule.register({
+            ttl: 600,
+            isGlobal: true,
         }),
         WeatherModule,
         SubscriptionModule,
