@@ -79,6 +79,10 @@ SMTP_PORT=465
 SMTP_SECURE=true
 SMTP_USER=
 SMTP_PASS=
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_TTL=600
 ```
 
 ## Start working
@@ -86,4 +90,8 @@ SMTP_PASS=
 ```bash
 # This command starts containers with Postgres, RabbitMQ, and Redis
 $ docker compose -f docker-compose.common.yml up -d
+
+# Development build with watch mode
+$ docker compose -f docker-compose.dev.yml up --build
+
 ```

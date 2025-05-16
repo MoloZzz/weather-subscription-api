@@ -8,5 +8,19 @@ services:
         - 6379:6379
       networks:
         weather-api:
+  postgres:
+    container_name: postgres
+    image: postgres:15.6-alpine3.19
+    environment:
+      POSTGRES_DB: weather-subscription
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "NotForProduction"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    ports:
+      - 5477:5432
+    networks:
+      weather-api:
 networks:
   weather-api:

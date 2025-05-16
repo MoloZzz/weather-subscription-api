@@ -1,0 +1,21 @@
+version: '3.9'
+services:
+  api:
+    container_name: main-weather-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    command: yarn start:dev
+    networks:
+      - weather-api
+
+networks:
+  weather-api:
+    driver: bridge
