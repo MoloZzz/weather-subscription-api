@@ -81,3 +81,9 @@ SMTP_USER=
 SMTP_PASS=
 ```
 
+## Start working
+### Running common containers
+```bash
+# This command starts containers with Postgres, RabbitMQ, and Redis
+$ docker compose -f docker-compose.common.yml up -d
+```

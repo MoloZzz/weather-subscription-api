@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import * as Joi from 'joi';
 import { WeatherModule } from './weather/weather.module';
 import { SubscriptionModule } from './subscription/subscription.module';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { OpenWeatherModule } from './integrations/open-weather/open-weather.module';
 import { entities } from './common/entities';
 import { migrations } from './common/migrations';
@@ -12,6 +12,7 @@ import { UserModule } from './user/user.module';
 import { EmailModule } from './integrations/email/email.module';
 import { NotificationModule } from './notification/notification.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-ioredis';
 
 @Module({
     imports: [
@@ -34,11 +35,20 @@ import { CacheModule } from '@nestjs/cache-manager';
                 SMTP_USER: Joi.string().required(),
                 SMTP_PASS: Joi.string().required(),
                 SMTP_SECURE: Joi.boolean().required(),
+                REDIS_HOST: Joi.string().required(),
+                REDIS_PORT: Joi.number().required(),
+                REDIS_TTL: Joi.number().required(),
             }),
         }),
-        CacheModule.register({
-            ttl: 600,
+        CacheModule.registerAsync({
             isGlobal: true,
+            inject: [ConfigService],
+            useFactory: (configService: ConfigService) => ({
+                store: redisStore,
+                host: configService.get<string>('REDIS_HOST'),
+                port: Number(configService.get<string>('REDIS_PORT')),
+                ttl: Number(configService.get<string>('REDIS_TTL')),
+            }),
         }),
         WeatherModule,
         SubscriptionModule,
