@@ -26,7 +26,7 @@ export class CityService {
         const { name: realName, lat, lon } = geodata[0];
 
         const city = this.cityRepository.create({
-            name: realName,
+            name,
             lat,
             lon,
         });
