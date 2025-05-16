@@ -14,10 +14,6 @@ export class UserService {
         private readonly emailService: EmailService,
     ) {}
 
-    async findByEmail(email: string): Promise<UserEntity | null> {
-        return this.userRepository.findOne({ where: { email } });
-    }
-
     async findOrCreate(email: string): Promise<UserEntity> {
         let user = await this.findByEmail(email);
 
@@ -41,6 +37,14 @@ export class UserService {
         return user;
     }
 
+    async save(user: UserEntity): Promise<UserEntity> {
+        return this.userRepository.save(user);
+    }
+
+    async findByEmail(email: string): Promise<UserEntity | null> {
+        return this.userRepository.findOne({ where: { email } });
+    }
+
     async findByToken(token: string): Promise<UserEntity | null> {
         return this.userRepository.findOne({
             where: { confirmationToken: token },
@@ -50,10 +54,6 @@ export class UserService {
 
     async deactivateToken(token: string): Promise<void> {
         await this.userRepository.update({ confirmationToken: token }, { confirmationToken: null, confirmationExpiresAt: null });
-    }
-
-    async save(user: UserEntity): Promise<UserEntity> {
-        return this.userRepository.save(user);
     }
 
     async confirmEmail(token: string): Promise<UserEntity> {

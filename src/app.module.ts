@@ -10,6 +10,7 @@ import { PostgresqlModule } from './libs/postgresql/postgresql.module';
 import { CityModule } from './city/city.module';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './integrations/email/email.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
     imports: [
@@ -41,6 +42,7 @@ import { EmailModule } from './integrations/email/email.module';
         CityModule,
         UserModule,
         EmailModule,
+        NotificationModule,
     ],
     controllers: [],
     providers: [],

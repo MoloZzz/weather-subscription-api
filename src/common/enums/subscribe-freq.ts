@@ -1,4 +1,4 @@
 export enum SubscribeFreq {
-    hourly = 'hourly',
+    weekly = 'weekly',
     daily = 'daily',
 }

@@ -57,5 +57,5 @@ export class OpenWeatherService {
             console.error('Error OpenWeatherService.getGeocodingDataByCity:', error);
             throw new HttpException('Failed to fetch coordinates by city', HttpStatus.BAD_GATEWAY);
         }
-    } //TODO: test
+    }
 }

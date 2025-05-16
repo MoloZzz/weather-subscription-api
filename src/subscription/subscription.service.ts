@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CityService } from 'src/city/city.service';
 import { SubscribeDto, SubscriptionResponseDto } from 'src/common/dtos';
 import { SubscriptionEntity } from 'src/common/entities/subscription.entity';
+import { SubscribeFreq } from 'src/common/enums';
 import { UserService } from 'src/user/user.service';
 import { Repository } from 'typeorm';
 
@@ -47,5 +48,12 @@ export class SubscriptionService {
         await this.subscriptionRepository.delete({ subscriber: { id: user.id } });
         await this.userService.deactivateToken(token);
         return { message: 'Unsubscribed successfully' };
+    }
+
+    async findActiveByFrequency(frequency: SubscribeFreq): Promise<SubscriptionEntity[]> {
+        return this.subscriptionRepository.find({
+            where: { frequency: frequency, isActive: true },
+            relations: ['subscriber', 'city'],
+        }); // or use query builder to minimize selects
     }
 }

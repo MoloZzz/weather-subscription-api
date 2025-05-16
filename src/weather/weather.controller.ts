@@ -17,6 +17,6 @@ export class WeatherController {
     @ApiBadRequestResponse({ description: 'Invalid request' })
     @ApiNotFoundResponse({ description: 'City not found' })
     async getWeather(@Param() param: CityParamDto): Promise<WeatherResponseDto> {
-        return this.weatherService.getWeather(param.city);
+        return this.weatherService.getWeather({ cityName: param.city });
     }
 }
