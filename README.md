@@ -68,6 +68,113 @@ Tokens in links are cryptographically generated and unique per subscription.
 - Input validation and serialization.
 - Scalable: New notification channels (e.g., Telegram, SMS) can be added without major changes.
 
+## 🔄 Core Logic by Routes
+
+### 🔹 `GET /weather?city=Kyiv`
+
+✅ Logic:
+
+- Extracts the city name from the query.
+- Checks if the city exists in the database (`CityEntity`). If not:
+  - Fetches coordinates from OpenWeather API.
+  - Saves city name, latitude, and longitude.
+- Checks if weather data for these coordinates exists in Redis cache.
+  - If yes → returns cached data.
+  - If no → fetches from OpenWeather API, caches in Redis (e.g., for 10 minutes).
+- Returns weather response (`temperature`, `humidity`, `description`).
+
+⚙️ Uses:
+
+- `cityService.findOrCreateByName(name)`
+- `openWeatherService.getCurrentWeather(lat, lon)`
+- `redisService.get()` / `set()` with TTL
+- DTO: `WeatherResponseDto`
+
+---
+
+### 🔹 `POST /subscribe`
+
+✅ Logic:
+
+- Accepts `email`, `city`, and `frequency`.
+- Validates input data.
+- Finds or creates(after request to open-weather-api) the city in the database.
+- Generates `confirmation_token` and `confirmation_expaires_at`.
+- Saves subscription to the DB with status `is_active: false`.
+- Sends confirmation email with token.
+
+⚙️ Uses:
+
+- `emailService.sendConfirmationEmail()`
+- `crypto` or `uuid` for token generation
+- DB entity: `SubscriptionEntity`
+- Unique constraint on `email + city` to prevent duplicates
+
+---
+
+### 🔹 `GET /confirm/{token}`
+
+✅ Logic:
+
+- Validates confirmation token (find by confirmation_token and checking confirmation_expires_at).
+- If valid → updates user status to `confirmed`, subscriptions to `is_active: true`.
+- Returns success or `400 / 404`.
+
+---
+
+### 🔹 `GET /unsubscribe/{token}`
+
+✅ Logic:
+
+- Finds user by `confirmation_token`.
+- Finds subscriptions by subscriber_id → removes (or can be changed to marking subscriptions as `is_active: false`).
+- Returns confirmation message.
+
+---
+
+## Email Service
+
+- Templates for:
+  - Subscription confirmation
+  - Daily/hourly forecast delivery
+  - Unsubscribe confirmation
+- Works via SMTP adapter and can be easily changed to external email provider API.
+
+---
+
+## Weather Delivery (CRON Jobs)
+
+- Uses `@nestjs/schedule` to manage jobs.
+- Two scheduled jobs:
+  - Every hour → for `frequency = 'hourly'`
+  - Every day at `08:00` → for `frequency = 'daily'`
+- For each active subscription:
+  - Fetches weather (coordinates can be cached for 10 min).
+  - Generates a concise weather summary email.
+  - Sends email to the user.
+
+---
+
+## Edge Case Handling
+
+- City name variations (e.g., `"Kyiv"` / `"Kiev"`) → creating like different request for quick access(normalisation + denormalization).
+- Duplicate subscriptions → handled with `409 Conflict`.
+- Tokens → support TTL(time to live aproach).
+- Frequently used requests → caching by redis.
+
+---
+
+## 🐳 Docker & Production
+
+- **Multi-stage Docker build**:
+  - `builder`: compiles TypeScript to `dist/`
+  - `runner`: production-only `node_modules` + compiled code
+- Redis used as a separate container.
+- External mail service supported via `.env`:
+  - `MAIL_HOST`, `MAIL_USER`, `MAIL_PASS`, etc.
+- `docker-compose.prod.yml` includes:
+  - `app`, `redis`, `postgres`, and `scheduler` (can be a separate process)
+
 ## Installation
 
 ```bash
