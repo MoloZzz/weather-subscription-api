@@ -36,7 +36,7 @@ This project is built using the following software architecture patterns and bes
 | Database           | PostgreSQL + TypeORM                          |
 | Scheduling         | `@nestjs/schedule` + `cron`                   |
 | Email Sending      | Nodemailer                                    |
-| Weather API        | [WeatherAPI.com](https://www.weatherapi.com/) |
+| Weather API        | [WeatherAPI.com](openweathermap.org) |
 | API Documentation  | Swagger (via `@nestjs/swagger`)               |
 | Validation         | `class-validator`, `class-transformer`        |
 | Environment Config | `@nestjs/config`                              |
