@@ -4,8 +4,70 @@
 - User calls the [post] /api/subscription/subscribe request passing email, notification frequency and city.
 - Receives a message with a token to the entered email.
 - Confirms the action by passing this token with a request [get] api/subscription/confirm.
+- Can repeat this action to get second, third... subscription, but only for new cities
 - Can stop receiving messages by passing the received token with a request to [get] api/subscription/unsubscribe
 - After unsubscribe, user can subscribe again using basic request. ([post] /api/subscription/subscribe)
+
+
+# Architecture & Design Principles (optional reading)
+This project is built using the following software architecture patterns and best practices:
+
+- Modular Structure: Clearly separated modules for weather, subscription, mailing, and scheduling services.
+- Separation of Concerns (SoC): Each service is responsible for a single aspect of the application (e.g., weather fetching, email delivery, user subscription, etc).
+- Single Responsibility Principle (SRP): All classes, functions, and modules are designed with a specific and well-defined responsibility.
+- Dependency Injection (DI): Built-in NestJS DI allows easy testing and flexibility in swapping implementations.
+- DRY Principle: Common logic is reused via providers and utility services.
+- Validation Layer: All incoming data is validated using DTOs and class-validator decorators.
+- Transactional Safety: Critical operations (e.g., confirming a subscription) are performed within database transactions.
+- Scalability & Maintainability: Clean abstraction layers and service boundaries make it easy to scale and maintain.
+
+## Swagger Overview (optional reading)
+
+- [GET] /weather – Get current weather data.
+- [POST] /subscribe – Subscribe to weather updates.
+- [GET] /confirm/{token} – Confirm email subscription.
+- [GET] /unsubscribe/{token} – Unsubscribe using a secure token.
+
+## Technology Stack (optional reading)
+| Layer / Area       | Technology                                    |
+| ------------------ | --------------------------------------------- |
+| Framework          | [NestJS](https://nestjs.com/)                 |
+| Language           | TypeScript                                    |
+| Database           | PostgreSQL + TypeORM                          |
+| Scheduling         | `@nestjs/schedule` + `cron`                   |
+| Email Sending      | Nodemailer                                    |
+| Weather API        | [WeatherAPI.com](https://www.weatherapi.com/) |
+| API Documentation  | Swagger (via `@nestjs/swagger`)               |
+| Validation         | `class-validator`, `class-transformer`        |
+| Environment Config | `@nestjs/config`                              |
+
+# Scheduling Weather Emails (optional reading)
+Uses *@nestjs/schedule* for cron jobs.
+
+After confirmation:
+
+The system schedules a cron job for the user’s email.
+
+Jobs are dynamic based on user-selected frequency.
+
+The job fetches the weather and sends an email.
+
+# Email System (optional reading)
+Built using *Nodemailer*.
+
+Email templates include unsubscribe links and weather summaries.
+
+Tokens in links are cryptographically generated and unique per subscription.
+
+## Best Practices Used (optional reading)
+- OOP
+- SOLID
+- Modularity (based on single responsibily principe): Feature-based module splitting (e.g., WeatherModule, SubscriptionModule, MailModule).
+- Configurable: .env-driven API keys and credentials using @nestjs/config.
+- Error Handling: Granular error responses (400, 404, 409) with descriptive messages.
+- Input validation and serialization.
+- Scalable: New notification channels (e.g., Telegram, SMS) can be added without major changes.
+
 ## Installation
 
 ```bash
