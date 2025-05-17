@@ -16,25 +16,21 @@ export class UserService {
 
     async findOrCreate(email: string): Promise<UserEntity> {
         let user = await this.findByEmail(email);
+        if (user) return user;
 
-        const confirmationToken = uuidv4();
-        const confirmationExpiresAt = dayjs().add(15, 'minutes').toDate();
+        return await this.userRepository.save({
+            email,
+            isConfirmed: false,
+        });
+    }
 
-        if (user) {
-            user.confirmationToken = confirmationToken;
-            user.confirmationExpiresAt = confirmationExpiresAt;
-            await this.userRepository.save(user);
-        } else {
-            user = this.userRepository.create({
-                email,
-                isConfirmed: false,
-                confirmationToken,
-                confirmationExpiresAt,
-            });
-            await this.userRepository.save(user);
-        }
-        await this.emailService.sendConfirmationEmail(user.email, confirmationToken);
-        return user;
+    async setUserConfirmation(user: UserEntity): Promise<void> {
+        if (user.isConfirmed) return;
+
+        user.confirmationToken = uuidv4();
+        user.confirmationExpiresAt = dayjs().add(15, 'minutes').toDate();
+        await this.userRepository.save(user);
+        await this.emailService.sendConfirmationEmail(user.email, user.confirmationToken);
     }
 
     async save(user: UserEntity): Promise<UserEntity> {

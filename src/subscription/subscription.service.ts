@@ -23,9 +23,9 @@ export class SubscriptionService {
             city,
             frequency: dto.frequency,
             subscriber,
-            isActive: false,
+            isActive: subscriber.isConfirmed,
         });
-
+        await this.userService.setUserConfirmation(subscriber);
         return {
             email: subscriber.email,
             city: city.name,

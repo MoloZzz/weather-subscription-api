@@ -20,6 +20,16 @@ export class EmailService {
         });
     }
 
+    async sendLetter(to: string, subject: string, text: string): Promise<void> {
+        try {
+            await this.transporter.sendMail({ from: 'Weather notificator', to, subject, text });
+            this.logger.log(`Email sent to ${to}`);
+        } catch (error) {
+            this.logger.error(`Failed to send email to ${to}`, error.stack);
+            throw new InternalServerErrorException('Failed to send email');
+        }
+    }
+
     async sendConfirmationEmail(to: string, token: string): Promise<void> {
         const subject = 'Confirm your email';
         const html = `
