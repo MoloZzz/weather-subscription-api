@@ -8,7 +8,7 @@ import { SubscriptionResponseDto, SubscribeDto } from 'src/common/dtos';
 export class SubscriptionController {
     constructor(private readonly subscriptionService: SubscriptionService) {}
 
-    @Post('/subscribe/:email/:city/:frequency')
+    @Post('subscribe/:email/:city/:frequency')
     @ApiOperation({
         summary: 'Subscribe to weather updates',
         description: 'Subscribe an email to receive weather updates for a specific city with chosen frequency.',

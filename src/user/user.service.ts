@@ -25,12 +25,15 @@ export class UserService {
     }
 
     async setUserConfirmation(user: UserEntity): Promise<void> {
-        if (user.isConfirmed) return;
-
         user.confirmationToken = uuidv4();
         user.confirmationExpiresAt = dayjs().add(15, 'minutes').toDate();
         await this.userRepository.save(user);
-        await this.emailService.sendConfirmationEmail(user.email, user.confirmationToken);
+        if (user.isConfirmed) {
+            await this.emailService.sendLetter(user.email, 'You are already confirmed', `Your new token - ${user.confirmationToken}, old is not valid`);
+            return;
+        }else{
+            await this.emailService.sendConfirmationEmail(user.email, user.confirmationToken);
+        };
     }
 
     async save(user: UserEntity): Promise<UserEntity> {
@@ -60,6 +63,10 @@ export class UserService {
 
         if (!user || !user.confirmationExpiresAt || user.confirmationExpiresAt < new Date()) {
             throw new BadRequestException('Confirmation token is invalid or expired');
+        }
+
+        if(user.isConfirmed) {
+            throw new BadRequestException('Email is already confirmed');
         }
 
         user.isConfirmed = true;
