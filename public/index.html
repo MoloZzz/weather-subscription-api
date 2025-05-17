@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Subscription</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f7f8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      color: #333;
+      text-align: center;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 1rem;
+    }
+
+    .tab-btn {
+      padding: 0.5rem 1rem;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 5px 5px 0 0;
+      cursor: pointer;
+      font-weight: bold;
+      flex: 1;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: #007bff;
+      color: white;
+    }
+
+    /* Форми */
+    form {
+      display: none;
+    }
+
+    form.active {
+      display: block;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+      color: #555;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .footer {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      text-align: center;
+      color: #777;
+    }
+
+    .message {
+      margin-top: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Weather Subscription</h2>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="subscribe">Subscribe</button>
+      <button class="tab-btn" data-tab="confirm">Confirm Token</button>
+      <button class="tab-btn" data-tab="unsubscribe">Unsubscribe</button>
+    </div>
+
+    <form id="subscribeForm" class="active">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="city">City</label>
+      <input type="text" id="city" name="city" required />
+
+      <label for="frequency">Frequency</label>
+      <select id="frequency" name="frequency" required>
+        <option value="">-- Choose --</option>
+        <option value="weekly">Weekly</option>
+        <option value="daily">Daily</option>
+      </select>
+
+      <button type="submit">Subscribe</button>
+    </form>
+
+    <form id="confirmForm">
+      <label for="confirmToken">Confirmation Token</label>
+      <input type="text" id="confirmToken" name="confirmToken" required />
+
+      <button type="submit">Confirm Subscription</button>
+    </form>
+
+    <form id="unsubscribeForm">
+      <label for="unsubscribeToken">Unsubscribe Token</label>
+      <input type="text" id="unsubscribeToken" name="unsubscribeToken" required />
+
+      <button type="submit">Unsubscribe</button>
+    </form>
+
+    <div class="message" id="messageBox"></div>
+
+    <div class="footer">
+      Powered by <a href="https://github.com/MoloZzz/weather-subscription-api" target="_blank">Weather Subscription API</a>
+    </div>
+  </div>
+
+<script>
+  const BASE_URL = 'http://localhost:4000/api/subscription';
+
+  const tabs = document.querySelectorAll('.tab-btn');
+  const forms = {
+    subscribe: document.getElementById('subscribeForm'),
+    confirm: document.getElementById('confirmForm'),
+    unsubscribe: document.getElementById('unsubscribeForm')
+  };
+  const messageBox = document.getElementById('messageBox');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const selected = tab.getAttribute('data-tab');
+      for (const key in forms) {
+        if (key === selected) {
+          forms[key].classList.add('active');
+        } else {
+          forms[key].classList.remove('active');
+        }
+      }
+
+      messageBox.textContent = '';
+      messageBox.className = 'message';
+    });
+  });
+
+  forms.subscribe.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageBox.textContent = '';
+    messageBox.className = 'message';
+
+    try {
+      const email = encodeURIComponent(forms.subscribe.email.value);
+      const city = encodeURIComponent(forms.subscribe.city.value);
+      const frequency = encodeURIComponent(forms.subscribe.frequency.value);
+
+      const url = `${BASE_URL}/subscribe/${email}/${city}/${frequency}`;
+
+      const response = await fetch(url,  {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        messageBox.textContent = 'Subscription successful! Please check your email to confirm.';
+        messageBox.classList.add('success');
+        forms.subscribe.reset();
+      } else {
+        const errorData = await response.json();
+        messageBox.textContent = errorData.message || 'Something went wrong.';
+        messageBox.classList.add('error');
+      }
+    } catch (err) {
+      alert(err.message);
+      messageBox.textContent = 'Network error. Please try again later.';
+      messageBox.classList.add('error');
+    }
+  });
+
+  forms.confirm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageBox.textContent = '';
+    messageBox.className = 'message';
+
+    try {
+      const token = encodeURIComponent(forms.confirm.confirmToken.value);
+      console.log(token);
+      const url = `${BASE_URL}/confirm/${token}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        messageBox.textContent = 'Subscription confirmed successfully!';
+        messageBox.classList.add('success');
+        forms.confirm.reset();
+      } else {
+        const errorData = await response.json();
+        messageBox.textContent = errorData.message || 'Failed to confirm subscription.';
+        messageBox.classList.add('error');
+      }
+    } catch (err) {
+      messageBox.textContent = 'Network error. Please try again later.';
+      messageBox.classList.add('error');
+    }
+  });
+
+  forms.unsubscribe.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    messageBox.textContent = '';
+    messageBox.className = 'message';
+
+    try {
+      const token = encodeURIComponent(forms.unsubscribe.unsubscribeToken.value);
+      const url = `${BASE_URL}/unsubscribe/${token}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        messageBox.textContent = 'Unsubscribed successfully!';
+        messageBox.classList.add('success');
+        forms.unsubscribe.reset();
+      } else {
+        const errorData = await response.json();
+        messageBox.textContent = errorData.message || 'Failed to unsubscribe.';
+        messageBox.classList.add('error');
+      }
+    } catch (err) {
+      messageBox.textContent = 'Network error. Please try again later.';
+      messageBox.classList.add('error');
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -4,10 +4,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ExceptionsFilter } from './common/filters/exception.filter';
+import * as express from 'express';
+import { join } from 'path';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
     app.setGlobalPrefix('api');
+    app.use('/public', express.static(join(__dirname, '../../', 'public')));
     app.enableCors();
     app.useGlobalFilters(new ExceptionsFilter());
     app.useGlobalPipes(

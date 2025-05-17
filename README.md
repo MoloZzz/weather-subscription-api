@@ -8,8 +8,14 @@
 - Can stop receiving messages by passing the received token with a request to [get] api/subscription/unsubscribe
 - After unsubscribe, user can subscribe again using basic request. ([post] /api/subscription/subscribe)
 
+## Recomendations
+- use body instead of 3 params in /subscribe
+- separate frontend and backend 
+- use [post] type for requests /confirm, /unsubscribe 
+- use email for unsubscribe instead of token
+- token can be used only for confirmation(not to save in main db, better to save in redis for 10-15 min) 
 
-# Architecture & Design Principles (optional reading)
+## Architecture & Design Principles (optional reading)
 This project is built using the following software architecture patterns and best practices:
 
 - Modular Structure: Clearly separated modules for weather, subscription, mailing, and scheduling services.
@@ -41,7 +47,7 @@ This project is built using the following software architecture patterns and bes
 | Validation         | `class-validator`, `class-transformer`        |
 | Environment Config | `@nestjs/config`                              |
 
-# Scheduling Weather Emails (optional reading)
+## Scheduling Weather Emails (optional reading)
 Uses *@nestjs/schedule* for cron jobs.
 
 After confirmation:
@@ -52,7 +58,7 @@ Jobs are dynamic based on user-selected frequency.
 
 The job fetches the weather and sends an email.
 
-# Email System (optional reading)
+## Email System (optional reading)
 Built using *Nodemailer*.
 
 Email templates include unsubscribe links and weather summaries.
@@ -68,11 +74,11 @@ Tokens in links are cryptographically generated and unique per subscription.
 - Input validation and serialization.
 - Scalable: New notification channels (e.g., Telegram, SMS) can be added without major changes.
 
-## 🔄 Core Logic by Routes
+## Core Logic by Routes
 
 ### 🔹 `GET /weather?city=Kyiv`
 
-✅ Logic:
+Logic:
 
 - Extracts the city name from the query.
 - Checks if the city exists in the database (`CityEntity`). If not:
@@ -83,7 +89,7 @@ Tokens in links are cryptographically generated and unique per subscription.
   - If no → fetches from OpenWeather API, caches in Redis (e.g., for 10 minutes).
 - Returns weather response (`temperature`, `humidity`, `description`).
 
-⚙️ Uses:
+Uses:
 
 - `cityService.findOrCreateByName(name)`
 - `openWeatherService.getCurrentWeather(lat, lon)`
@@ -94,7 +100,7 @@ Tokens in links are cryptographically generated and unique per subscription.
 
 ### 🔹 `POST /subscribe`
 
-✅ Logic:
+Logic:
 
 - Accepts `email`, `city`, and `frequency`.
 - Validates input data.
@@ -103,7 +109,7 @@ Tokens in links are cryptographically generated and unique per subscription.
 - Saves subscription to the DB with status `is_active: false`.
 - Sends confirmation email with token.
 
-⚙️ Uses:
+Uses:
 
 - `emailService.sendConfirmationEmail()`
 - `crypto` or `uuid` for token generation
@@ -114,7 +120,7 @@ Tokens in links are cryptographically generated and unique per subscription.
 
 ### 🔹 `GET /confirm/{token}`
 
-✅ Logic:
+Logic:
 
 - Validates confirmation token (find by confirmation_token and checking confirmation_expires_at).
 - If valid → updates user status to `confirmed`, subscriptions to `is_active: true`.
@@ -124,7 +130,7 @@ Tokens in links are cryptographically generated and unique per subscription.
 
 ### 🔹 `GET /unsubscribe/{token}`
 
-✅ Logic:
+Logic:
 
 - Finds user by `confirmation_token`.
 - Finds subscriptions by subscriber_id → removes (or can be changed to marking subscriptions as `is_active: false`).
